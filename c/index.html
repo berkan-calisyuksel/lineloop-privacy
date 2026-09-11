@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>LineLoop</title>
+<style>
+  :root { color-scheme: dark; }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+       max-width:520px;margin:0 auto;padding:56px 22px;line-height:1.55;
+       background:#0d0a1e;color:#e9e6f5;text-align:center;}
+  h1{font-size:34px;margin:0 0 10px;background:linear-gradient(90deg,#ff3d7f,#7c3aed);
+     -webkit-background-clip:text;background-clip:text;color:transparent;}
+  p{margin:0 0 26px;color:#c9c2e0;font-size:17px;}
+  .btn{display:block;padding:16px 18px;margin:12px 0;border-radius:14px;
+       font-weight:700;font-size:17px;text-decoration:none;}
+  .primary{background:linear-gradient(135deg,#ff3d7f,#7c3aed);color:#fff;}
+  .secondary{background:#171331;border:1px solid #2a2350;color:#e9e6f5;}
+  .muted{color:#8f86ad;font-size:13px;margin-top:30px;}
+  a.plain{color:#ff6aa0;}
+</style>
+</head>
+<body>
+  <h1>LineLoop</h1>
+  <p id="lead"></p>
+  <div id="actions"></div>
+  <p class="muted"><a class="plain" href="../">Gizlilik &amp; Destek · Privacy &amp; Support</a></p>
+<script>
+(function () {
+  var APP_STORE = 'https://apps.apple.com/app/id6774609433';
+  var PLAY_STORE = 'https://play.google.com/store/apps/details?id=com.lineloop.lineloop';
+  var PACKAGE = 'com.lineloop.lineloop';
+
+  var params = new URLSearchParams(location.search);
+  var raw = (params.get('d') || '').toLowerCase();
+  var challenge = raw === 'daily' || raw === 'master' ? raw : null;
+
+  var tr = (navigator.language || '').toLowerCase().indexOf('tr') === 0;
+  var text = tr ? {
+    daily: 'Bugünün rotasına meydan okundun. Aynı bulmacayı çöz, skorunu karşılaştır.',
+    master: 'Haftanın Usta rotasına meydan okundun. Aynı bulmacayı çöz, skorunu karşılaştır.',
+    none: 'Tek çizgide tüm yolları tamamla. 1000 neon bulmaca, Günlük ve Usta modu.',
+    open: "LineLoop'ta aç",
+    appStore: "App Store'dan indir",
+    playStore: "Google Play'den indir"
+  } : {
+    daily: "You've been challenged on today's route. Solve the same puzzle and compare scores.",
+    master: "You've been challenged on this week's Master route. Solve the same puzzle and compare scores.",
+    none: 'Trace every line in one stroke. 1,000 neon puzzles, Daily and Master modes.',
+    open: 'Open in LineLoop',
+    appStore: 'Download on the App Store',
+    playStore: 'Get it on Google Play'
+  };
+  if (tr) document.documentElement.lang = 'tr'; else document.documentElement.lang = 'en';
+
+  var ua = navigator.userAgent || '';
+  var android = /Android/i.test(ua);
+  var ios = /iPhone|iPad|iPod/i.test(ua) ||
+    (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+
+  document.getElementById('lead').textContent = text[challenge || 'none'];
+  var actions = document.getElementById('actions');
+  function button(label, href, primary) {
+    var a = document.createElement('a');
+    a.className = 'btn ' + (primary ? 'primary' : 'secondary');
+    a.href = href;
+    a.textContent = label;
+    actions.appendChild(a);
+  }
+
+  var appLink = challenge ? 'lineloop://challenge/' + challenge : null;
+
+  if (android) {
+    // Chrome opens the app when installed and otherwise follows the fallback to
+    // Google Play, with no error page either way.
+    var target = appLink
+      ? 'intent://challenge/' + challenge + '#Intent;scheme=lineloop;package=' +
+        PACKAGE + ';S.browser_fallback_url=' + encodeURIComponent(PLAY_STORE) + ';end'
+      : PLAY_STORE;
+    button(appLink ? text.open : text.playStore, target, true);
+    location.replace(target);
+  } else if (ios) {
+    // Safari shows an error for an app that is not installed, so on iOS the
+    // app link waits for a tap instead of firing on its own.
+    if (appLink) {
+      button(text.open, appLink, true);
+      button(text.appStore, APP_STORE, false);
+    } else {
+      button(text.appStore, APP_STORE, true);
+      location.replace(APP_STORE);
+    }
+  } else {
+    button(text.appStore, APP_STORE, true);
+    button(text.playStore, PLAY_STORE, false);
+  }
+})();
+</script>
+</body>
+</html>
